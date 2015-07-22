@@ -92,9 +92,10 @@ public class DatePickerPlugin extends CordovaPlugin {
 			@Override
 			public void run() {
 				final TimeSetListener timeSetListener = new TimeSetListener(datePickerPlugin, callbackContext, calendarDate);
-				final TimePickerDialog timeDialog = new TimePickerDialog(currentCtx, theme, timeSetListener, jsonDate.hour,
-						jsonDate.minutes, jsonDate.is24Hour) {
+				final CustomTimePickerDialog timeDialog = new CustomTimePickerDialog(currentCtx, theme, timeSetListener, jsonDate.hour,
+						jsonDate.minutes, jsonDate.is24Hour, jsonDate.minuteInterval) {
 					public void onTimeChanged(TimePicker view, int hourOfDay, int minute) {
+						super.onTimeChanged(view, hourOfDay, minute);
 						timePicker = view;
 						timePickerHour = hourOfDay;
 						timePickerMinute = minute;
@@ -347,6 +348,7 @@ public class DatePickerPlugin extends CordovaPlugin {
 		private int hour = 0;
 		private int minutes = 0;
 		private boolean is24Hour = false;
+		private int minuteInterval = 1;
 
 		public JsonDate() {
 			reset(Calendar.getInstance());
@@ -378,6 +380,7 @@ public class DatePickerPlugin extends CordovaPlugin {
 						: "";
 				is24Hour = isNotEmpty(obj, "is24Hour") ? obj.getBoolean("is24Hour")
 						: false;
+				minuteInterval = isNotEmpty(obj, "minuteInterval") ? obj.getInt("minuteInterval") : 1;
 
 				String optionDate = obj.getString("date");
 
@@ -405,5 +408,36 @@ public class DatePickerPlugin extends CordovaPlugin {
 		}
 
 	}
+
+	private final class CustomTimePickerDialog extends TimePickerDialog{
+        private int TIME_PICKER_INTERVAL=15;
+        private boolean mIgnoreEvent=false;
+
+        public CustomTimePickerDialog(Context context, int theme, OnTimeSetListener callBack, int hourOfDay, int minute, boolean is24HourView, int minuteInterval) {
+        	super(context, theme, callBack, hourOfDay, minute, is24HourView);
+        	TIME_PICKER_INTERVAL = minuteInterval;
+        }
+ 
+        @Override
+        public void onTimeChanged(TimePicker timePicker, int hourOfDay, int minute) {
+            super.onTimeChanged(timePicker, hourOfDay, minute);
+            if (!mIgnoreEvent){
+                minute = getRoundedMinute(minute);
+                mIgnoreEvent=true;
+                timePicker.setCurrentMinute(minute);
+                mIgnoreEvent=false;
+            }
+        }
+
+        public static int getRoundedMinute(int minute){
+             if(minute % TIME_PICKER_INTERVAL != 0){
+                int minuteFloor = minute - (minute % TIME_PICKER_INTERVAL);
+                minute = minuteFloor + (minute == minuteFloor + 1 ? TIME_PICKER_INTERVAL : 0);
+                if (minute == 60)  minute=0;
+             }
+
+            return minute;
+        }
+    }
 
 }
