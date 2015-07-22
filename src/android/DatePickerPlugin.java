@@ -409,7 +409,7 @@ public class DatePickerPlugin extends CordovaPlugin {
 
 	}
 
-	private final class CustomTimePickerDialog extends TimePickerDialog{
+	private class CustomTimePickerDialog extends TimePickerDialog{
         private int TIME_PICKER_INTERVAL=15;
         private boolean mIgnoreEvent=false;
 
@@ -429,7 +429,7 @@ public class DatePickerPlugin extends CordovaPlugin {
             }
         }
 
-        public static int getRoundedMinute(int minute){
+        public int getRoundedMinute(int minute){
              if(minute % TIME_PICKER_INTERVAL != 0){
                 int minuteFloor = minute - (minute % TIME_PICKER_INTERVAL);
                 minute = minuteFloor + (minute == minuteFloor + 1 ? TIME_PICKER_INTERVAL : 0);
