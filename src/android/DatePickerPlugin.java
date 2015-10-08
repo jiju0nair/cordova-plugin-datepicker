@@ -136,6 +136,17 @@ public class DatePickerPlugin extends CordovaPlugin {
 						}
 					});
 				}
+
+				//Handle back button
+				//http://stackoverflow.com/questions/10346011/how-to-handle-back-button-with-in-the-dialog
+				timeDialog.setOnCancelListener(new DialogInterface.OnCancelListener() {
+					@Override
+					public void onCancel(DialogInterface dialog) {
+						canceled = true;
+						callbackContext.error(RESULT_CANCEL);
+					}
+				});
+
 				timeDialog.show();
 				timeDialog.updateTime(new Random().nextInt(23), new Random().nextInt(59));
 				timeDialog.updateTime(jsonDate.hour, jsonDate.minutes);
@@ -159,6 +170,16 @@ public class DatePickerPlugin extends CordovaPlugin {
 				else {
 					prepareDialogPreHoneycomb(dateDialog, callbackContext, currentCtx, jsonDate);
 				}
+
+				//Handle back button
+				//http://stackoverflow.com/questions/10346011/how-to-handle-back-button-with-in-the-dialog
+				dateDialog.setOnCancelListener(new DialogInterface.OnCancelListener() {
+					@Override
+					public void onCancel(DialogInterface dialog) {
+						canceled = true;
+						callbackContext.error(RESULT_CANCEL);
+					}
+				});
 				
 				dateDialog.show();
 			}
