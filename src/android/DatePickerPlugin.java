@@ -94,11 +94,19 @@ public class DatePickerPlugin extends CordovaPlugin {
 				final TimeSetListener timeSetListener = new TimeSetListener(datePickerPlugin, callbackContext, calendarDate);
 				final CustomTimePickerDialog timeDialog = new CustomTimePickerDialog(currentCtx, theme, timeSetListener, jsonDate.hour,
 						jsonDate.minutes, jsonDate.is24Hour, jsonDate.minuteInterval) {
+					private boolean mIgnoreEvent=false;
+
 					public void onTimeChanged(TimePicker view, int hourOfDay, int minute) {
+						if(mIgnoreEvent) return;
+
+						mIgnoreEvent = true;
+
 						super.onTimeChanged(view, hourOfDay, minute);
 						timePicker = view;
 						timePickerHour = hourOfDay;
-						timePickerMinute = minute;
+						timePickerMinute = this.getRoundedMinute(minute);;
+
+						mIgnoreEvent=false;
 					}
 				};
 				if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
@@ -441,13 +449,14 @@ public class DatePickerPlugin extends CordovaPlugin {
  
         @Override
         public void onTimeChanged(TimePicker timePicker, int hourOfDay, int minute) {
-            super.onTimeChanged(timePicker, hourOfDay, minute);
-            if (!mIgnoreEvent){
-                minute = getRoundedMinute(minute);
-                mIgnoreEvent=true;
-                timePicker.setCurrentMinute(minute);
-                mIgnoreEvent=false;
-            }
+            if(mIgnoreEvent) return;
+
+    		mIgnoreEvent=true;
+            
+            minute = getRoundedMinute(minute);
+            timePicker.setCurrentMinute(minute);
+            
+            mIgnoreEvent=false;
         }
 
         public int getRoundedMinute(int minute){
