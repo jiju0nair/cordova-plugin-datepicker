@@ -101,11 +101,12 @@ public class DatePickerPlugin extends CordovaPlugin {
 
 						mIgnoreEvent = true;
 
-						super.onTimeChanged(view, hourOfDay, minute);
 						timePicker = view;
 						timePickerHour = hourOfDay;
 						timePickerMinute = this.getRoundedMinute(minute);;
 
+						super.onTimeChanged(view, timePickerHour, timePickerMinute);
+						
 						mIgnoreEvent=false;
 					}
 				};
@@ -443,11 +444,11 @@ public class DatePickerPlugin extends CordovaPlugin {
             if(mIgnoreEvent) return;
 
     		mIgnoreEvent=true;
-            
-    		super.onTimeChanged(timePicker, hourOfDay, minute);
 
             minute = getRoundedMinute(minute);
             timePicker.setCurrentMinute(minute);
+
+    		super.onTimeChanged(timePicker, hourOfDay, minute);
             
             mIgnoreEvent=false;
         }
