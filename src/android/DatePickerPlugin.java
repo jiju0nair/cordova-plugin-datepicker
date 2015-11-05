@@ -444,6 +444,8 @@ public class DatePickerPlugin extends CordovaPlugin {
 
     		mIgnoreEvent=true;
             
+    		super.onTimeChanged(timePicker, hourOfDay, minute);
+
             minute = getRoundedMinute(minute);
             timePicker.setCurrentMinute(minute);
             
