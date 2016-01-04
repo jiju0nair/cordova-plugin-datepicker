@@ -92,21 +92,18 @@ public class DatePickerPlugin extends CordovaPlugin {
 			@Override
 			public void run() {
 				final TimeSetListener timeSetListener = new TimeSetListener(datePickerPlugin, callbackContext, calendarDate);
-				final CustomTimePickerDialog timeDialog = new CustomTimePickerDialog(currentCtx, theme, timeSetListener, jsonDate.hour,
-						jsonDate.minutes, jsonDate.is24Hour, jsonDate.minuteInterval) {
+				final CustomTimePickerDialog timeDialog = new CustomTimePickerDialog(currentCtx, theme, timeSetListener, jsonDate.hour, jsonDate.minutes, jsonDate.is24Hour, jsonDate.minuteInterval, jsonDate.minHour, jsonDate.maxHour) {
 					private boolean mIgnoreEvent=false;
-
+					
 					public void onTimeChanged(TimePicker view, int hourOfDay, int minute) {
 						if(mIgnoreEvent) return;
-
 						mIgnoreEvent = true;
 
 						timePicker = view;
 						timePickerHour = hourOfDay;
-						timePickerMinute = this.getRoundedMinute(minute);;
+						timePickerMinute = this.getRoundedMinute(minute);
 
 						super.onTimeChanged(view, timePickerHour, timePickerMinute);
-						
 						mIgnoreEvent=false;
 					}
 				};
@@ -363,6 +360,8 @@ public class DatePickerPlugin extends CordovaPlugin {
 		private String nowText = "";
 		private long minDate = 0;
 		private long maxDate = 0;
+		private int minHour = -1;
+		private int maxHour = 25;
 		private int month = 0;
 		private int day = 0;
 		private int year = 0;
@@ -391,6 +390,7 @@ public class DatePickerPlugin extends CordovaPlugin {
 
 				minDate = isNotEmpty(obj, "minDate") ? obj.getLong("minDate") : 0l;
 				maxDate = isNotEmpty(obj, "maxDate") ? obj.getLong("maxDate") : 0l;
+				
 
 				okText = isNotEmpty(obj, "okText") ? obj.getString("okText") : "";
 				cancelText = isNotEmpty(obj, "cancelText") ? obj
@@ -402,6 +402,8 @@ public class DatePickerPlugin extends CordovaPlugin {
 				is24Hour = isNotEmpty(obj, "is24Hour") ? obj.getBoolean("is24Hour")
 						: false;
 				minuteInterval = isNotEmpty(obj, "minuteInterval") ? obj.getInt("minuteInterval") : 1;
+				minHour 			= isNotEmpty(obj, "minHour") ? obj.getInt("minHour") : -1;
+				maxHour 		= isNotEmpty(obj, "maxHour") ? obj.getInt("maxHour") : 25;
 
 				String optionDate = obj.getString("date");
 
@@ -433,23 +435,51 @@ public class DatePickerPlugin extends CordovaPlugin {
 	private class CustomTimePickerDialog extends TimePickerDialog{
         private int TIME_PICKER_INTERVAL=15;
         private boolean mIgnoreEvent=false;
+		private int timeLaunch= 0;
+		private int minHour = -1;
+		private int maxHour = 25;
+		private int currentHour = 0;
+		private int currentMinute = 0;
 
-        public CustomTimePickerDialog(Context context, int theme, OnTimeSetListener callBack, int hourOfDay, int minute, boolean is24HourView, int minuteInterval) {
+        public CustomTimePickerDialog(Context context, int theme, OnTimeSetListener callBack, int hourOfDay, int minute, boolean is24HourView, int minuteInterval, int nHour, int xHour) {
         	super(context, theme, callBack, hourOfDay, minute, is24HourView);
+			currentHour = hourOfDay;
+			minHour = nHour;
+			maxHour = xHour;
         	TIME_PICKER_INTERVAL = minuteInterval;
         }
- 
+		
         @Override
         public void onTimeChanged(TimePicker timePicker, int hourOfDay, int minute) {
             if(mIgnoreEvent) return;
-
-    		mIgnoreEvent=true;
-
-            minute = getRoundedMinute(minute);
+			
+    		mIgnoreEvent=true;		
+			boolean validTime = true;
+			if (hourOfDay < minHour){
+				validTime = false;
+			}
+			if (hourOfDay  > maxHour){
+				validTime = false;
+			}
+			if (validTime) {
+				currentHour = hourOfDay;
+			}
+			
+			if(timeLaunch>3){
+				timePicker.setCurrentHour(currentHour);
+			}
+			else{
+				if (1 < minHour)
+					timePicker.setCurrentHour(minHour);
+				else
+					timePicker.setCurrentHour(1);
+				timeLaunch++;
+			}
+			
+			minute = getRoundedMinute(minute);
             timePicker.setCurrentMinute(minute);
-
-    		super.onTimeChanged(timePicker, hourOfDay, minute);
-            
+			
+    		super.onTimeChanged(timePicker, currentHour, minute);
             mIgnoreEvent=false;
         }
 
