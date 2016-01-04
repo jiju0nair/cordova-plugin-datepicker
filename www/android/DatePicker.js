@@ -39,6 +39,8 @@ DatePicker.prototype.show = function(options, cb, errCb) {
 		date : '',
 		minDate: 0,
 		maxDate: 0,
+		minHour: -1,
+		maxHour: 25,
 		cancelText: '',
 		okText: '',
 		todayText: '',
